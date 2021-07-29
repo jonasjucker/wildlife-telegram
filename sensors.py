@@ -14,6 +14,9 @@ class Pir:
 
         GPIO.add_event_detect(self.pin, GPIO.RISING, callback=execute_on_detection)
 
+    def deactivate(self):
+        GPIO.cleanup(self.pin)
+
     def wait_for_movement(self):
         no_movement = True
         print('Wait for movement...')
@@ -29,8 +32,10 @@ if __name__ == '__main__':
     pirtest.activate()
 
     pirtest.wait_for_movement()
-    pirtest.wait_for_movement()
+    pirtest.deactivate()
     pirtest.wait_for_movement()
     pirtest.wait_for_movement()
 
-    GPIO.cleanup()
+    pirtest.wait_for_movement()
+
+    pirtest.deactivate()

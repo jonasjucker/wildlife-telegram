@@ -20,7 +20,7 @@ def main():
 
     except KeyboardInterrupt:
         cam.close()
-        GPIO.cleanup()
+        pir.deactivate()
         print('Cleanup')
 
 
