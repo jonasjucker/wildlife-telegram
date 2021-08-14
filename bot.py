@@ -64,8 +64,15 @@ class WildBot:
 
         logging.info(context.bot_data.setdefault('user_id', set()))
 
-    def broadcast(self):
+    def broadcast(self,photos,video):
         message = 'Hello from subscription'
         for user_id in self.dp.bot_data['user_id']:
             logging.info(user_id)
             self.dp.bot.send_message(chat_id=user_id, text=message)
+            for photo in photos:
+                self.dp.bot.send_photo(chat_id=user_id, photo=open(photo, 'rb'))
+            logging.info('photos sent')
+
+            self.dp.bot.send_video(chat_id=user_id, video=open(video, 'rb'))
+            logging.info('video sent')
+

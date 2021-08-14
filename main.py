@@ -1,5 +1,7 @@
 import RPi.GPIO as GPIO
 import logging
+import argparse
+import time
 
 from sensors import Pir
 from cam import WildCam
@@ -35,9 +37,11 @@ def main():
     try:
         while True:
             pir.wait_for_movement()
-            cam.shot(nr_of_shots=3,pause=1,night_mode=True)
-            cam.record(3,night_mode=True)
-            bot.broadcast()
+            photos = cam.shot(nr_of_shots=1,pause=1,night_mode=False)
+            video = cam.record(3,night_mode=False)
+            bot.broadcast(photos,video)
+            logging.info('sleep 10s ...')
+            time.sleep(10)
 
     except KeyboardInterrupt:
         cam.close()

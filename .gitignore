@@ -1,4 +1,5 @@
 __pycache__
 photos/*.jpg
 videos/*.h264
+videos/*.mp4
 backup/*.pkl

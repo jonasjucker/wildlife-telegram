@@ -1,4 +1,5 @@
 import RPi.GPIO as GPIO
+import logging
 
 class Pir:
 
@@ -10,7 +11,7 @@ class Pir:
     def activate(self):
 
         def execute_on_detection(self):
-            print('Movement detected')
+            logging.debug('Movement detected')
 
         GPIO.add_event_detect(self.pin, GPIO.RISING, callback=execute_on_detection)
 
@@ -19,10 +20,11 @@ class Pir:
 
     def wait_for_movement(self):
         no_movement = True
-        print('Wait for movement...')
+        logging.info('Wait for movement...')
         while no_movement:
             if GPIO.event_detected(self.pin):
                no_movement = False
+        logging.info('Movement detected')
 
 if __name__ == '__main__':
 

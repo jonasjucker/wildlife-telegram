@@ -2,6 +2,9 @@ import RPi.GPIO as GPIO
 from picamera import PiCamera
 import time
 import os
+import logging
+
+from subprocess import call
 
 class WildCam:
 
@@ -33,9 +36,17 @@ class WildCam:
             GPIO.output(self.pin,GPIO.HIGH)
 
         record_name = self.new_record_name('h264','v')
+        record_mp4 = self.new_record_name('mp4','v')
         self.lens.start_recording(record_name)
         time.sleep(duration)
         self.lens.stop_recording()
+
+        # Convert the h264 format to the mp4 format.
+        command = "MP4Box -add " + record_name + " " + record_mp4
+        call([command], shell=True)
+        logging.info("\r\nRasp_Pi => Video Converted! \r\n")
+
+        return record_mp4
 
     def shot(self,nr_of_shots=1,pause=1,night_mode=False):
 
@@ -44,11 +55,15 @@ class WildCam:
         else:
             GPIO.output(self.pin,GPIO.HIGH)
 
+        shots_taken = []
         for idx in range(1,nr_of_shots+1):
             record_name = self.new_record_name('jpg','p')
             self.lens.capture(record_name)
             print(f'Shot {idx} taken')
             time.sleep(pause)
+            shots_taken.append(record_name)
+
+        return shots_taken
 
     def new_record_name(self,suffix,type):
         t = time.localtime()
