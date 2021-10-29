@@ -38,7 +38,7 @@ def main():
         while True:
             pir.wait_for_movement()
             photos = cam.shot(nr_of_shots=1,pause=1,night_mode=False)
-            video = cam.record(3,night_mode=False)
+            video = cam.record(2,night_mode=True)
             bot.broadcast(photos,video)
             logging.info('sleep 10s ...')
             time.sleep(10)

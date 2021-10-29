@@ -11,35 +11,52 @@ class WildCam:
     def __init__(self):
 
         self.pin = 24
+        self.ir_light = 25
+
         self.lens = PiCamera()
+
         GPIO.setup(self.pin,GPIO.OUT)
+        GPIO.setup(self.ir_light,GPIO.OUT)
+
+        self.is_recording = False
 
     def close(self):
         self.lens.close()
 
+    def vision_settings(self,is_night):
+        if self.is_recording:
+            GPIO.output(self.ir_light,GPIO.LOW)
+            self.is_recording = False
+
+        else:
+            self.is_recording = True
+            if is_night:
+                GPIO.output(self.pin,GPIO.LOW)
+                GPIO.output(self.ir_light,GPIO.HIGH)
+            else:
+                GPIO.output(self.pin,GPIO.HIGH)
+
+
     def preview(self,duration, night_mode=False):
 
-        if night_mode:
-            GPIO.output(self.pin,GPIO.LOW)
-        else:
-            GPIO.output(self.pin,GPIO.HIGH)
+        self.vision_settings(night_mode)
 
         self.lens.start_preview()
         time.sleep(duration)
         self.lens.stop_preview()
+        self.vision_settings(night_mode)
 
     def record(self,duration, night_mode=False):
 
-        if night_mode:
-            GPIO.output(self.pin,GPIO.LOW)
-        else:
-            GPIO.output(self.pin,GPIO.HIGH)
+        self.vision_settings(night_mode)
 
         record_name = self.new_record_name('h264','v')
         record_mp4 = self.new_record_name('mp4','v')
         self.lens.start_recording(record_name)
         time.sleep(duration)
         self.lens.stop_recording()
+        self.vision_settings(night_mode)
+
 
         # Convert the h264 format to the mp4 format.
         command = "MP4Box -add " + record_name + " " + record_mp4
@@ -50,18 +67,17 @@ class WildCam:
 
     def shot(self,nr_of_shots=1,pause=1,night_mode=False):
 
-        if night_mode:
-            GPIO.output(self.pin,GPIO.LOW)
-        else:
-            GPIO.output(self.pin,GPIO.HIGH)
+        self.vision_settings(night_mode)
 
         shots_taken = []
         for idx in range(1,nr_of_shots+1):
             record_name = self.new_record_name('jpg','p')
             self.lens.capture(record_name)
-            print(f'Shot {idx} taken')
+            logging.info(f'Shot {idx} taken')
             time.sleep(pause)
             shots_taken.append(record_name)
+
+        self.vision_settings(night_mode)
 
         return shots_taken
 
