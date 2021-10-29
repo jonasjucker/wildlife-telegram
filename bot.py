@@ -22,6 +22,9 @@ class WildBot:
         self.dp.add_handler(CommandHandler('start',self._start))
         self.dp.add_handler(CommandHandler('subscribe',self._subscribe))
         self.dp.add_handler(CommandHandler('unsubscribe',self._unsubscribe))
+        self.dp.add_handler(CommandHandler('shutdown',self._shutdown))
+
+        self.user_wants_shutdown = False
 
         # start the bot
         self.updater.start_polling()
@@ -29,7 +32,7 @@ class WildBot:
     def stop(self):
         self.updater.stop()
 
-    def _start(update: Update, context: CallbackContext):
+    def _start(self,update: Update, context: CallbackContext):
         reply_text = "Hi! I am LonelyCam. If you want to subscribe write /subscribe. \
                       Write /unsubscribe to no longer receive cute pics"
 
@@ -37,7 +40,7 @@ class WildBot:
             ['/subscribe', '/unsubscribe'],
         ]
 
-        markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
+        markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=False)
 
         update.message.reply_text(reply_text, reply_markup=markup)
 
@@ -63,6 +66,14 @@ class WildBot:
             context.bot_data['user_id'].remove(user_id)
 
         logging.info(context.bot_data.setdefault('user_id', set()))
+
+    def _shutdown(self,update: Update, context: CallbackContext):
+        reply_text = "You are about to shut down LonelyCam."
+        update.message.reply_text(reply_text)
+
+        self.user_wants_shutdown = True
+        user_id = update.effective_user.id
+        logging.info(f'user: {user_id} scheduled shutdown')
 
     def broadcast(self,photos,video):
         message = 'Hello from subscription'

@@ -2,6 +2,7 @@ import RPi.GPIO as GPIO
 import logging
 import argparse
 import time
+import sys
 
 from sensors import Pir
 from cam import WildCam
@@ -34,20 +35,21 @@ def main():
     cam = WildCam()
     bot = WildBot(args.bot_token)
 
-    try:
-        while True:
-            pir.wait_for_movement()
-            photos = cam.shot(nr_of_shots=1,pause=1,night_mode=False)
-            video = cam.record(2,night_mode=True)
-            bot.broadcast(photos,video)
-            logging.info('sleep 10s ...')
-            time.sleep(10)
+    while True:
+        logging.info('Enter infinite loop')
+        pir.wait_for_movement()
+        photos = cam.shot(nr_of_shots=5,pause=1,night_mode=False)
+        video = cam.record(10,night_mode=True)
+        bot.broadcast(photos,video)
+        logging.info('sleep 10s ...')
+        time.sleep(10)
 
-    except KeyboardInterrupt:
-        cam.close()
-        bot.stop()
-        pir.deactivate()
-        logging.info('Cleanup')
+        if bot.user_wants_shutdown:
+            cam.close()
+            bot.stop()
+            pir.deactivate()
+            logging.info('Shutdown')
+            sys.exit(0)
 
 if __name__ == '__main__':
     main()
