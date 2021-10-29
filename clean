@@ -1,0 +1,6 @@
+#!/bin/bash
+set -x
+
+rm garbage/*
+rm videos/*
+rm photos/*
