@@ -1,5 +1,6 @@
 import argparse
 import logging
+from exchange import set_bot_action
 
 from telegram import ReplyKeyboardMarkup, Update
 from telegram.ext import (
@@ -22,9 +23,11 @@ class WildBot:
         self.dp.add_handler(CommandHandler('start',self._start))
         self.dp.add_handler(CommandHandler('subscribe',self._subscribe))
         self.dp.add_handler(CommandHandler('unsubscribe',self._unsubscribe))
+        self.dp.add_handler(CommandHandler('test',self._test))
         self.dp.add_handler(CommandHandler('shutdown',self._shutdown))
 
         self.user_wants_shutdown = False
+        self.user_wants_test = False
 
         # start the bot
         self.updater.start_polling()
@@ -37,7 +40,7 @@ class WildBot:
                       Write /unsubscribe to no longer receive cute pics"
 
         reply_keyboard = [
-            ['/subscribe', '/unsubscribe'],
+            ['/subscribe', '/unsubscribe', '/test'],
         ]
 
         markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=False)
@@ -67,24 +70,37 @@ class WildBot:
 
         logging.info(context.bot_data.setdefault('user_id', set()))
 
+    def _test(self,update: Update, context: CallbackContext):
+        reply_text = "Test LonelyCam! Please wait..."
+        update.message.reply_text(reply_text)
+
+        self.user_wants_test = True
+        set_bot_action(True)
+        user_id = update.effective_user.id
+        logging.info(f'user: {user_id} scheduled test')
+
     def _shutdown(self,update: Update, context: CallbackContext):
         reply_text = "You are about to shut down LonelyCam."
         update.message.reply_text(reply_text)
 
         self.user_wants_shutdown = True
+        set_bot_action(True)
         user_id = update.effective_user.id
         logging.info(f'user: {user_id} scheduled shutdown')
 
-    def broadcast(self,photos,video):
+    def broadcast(self,photos,videos):
         message = 'Hello from subscription'
         for user_id in self.dp.bot_data['user_id']:
             logging.info(user_id)
             self.dp.bot.send_message(chat_id=user_id, text=message)
 
-            for photo in photos:
-                self.dp.bot.send_photo(chat_id=user_id, photo=open(photo, 'rb'))
-            logging.info('photos sent')
+            if photos:
+                for photo in photos:
+                    self.dp.bot.send_photo(chat_id=user_id, photo=open(photo, 'rb'))
+                logging.info('photos sent')
 
-            self.dp.bot.send_video(chat_id=user_id, video=open(video, 'rb'))
-            logging.info('video sent')
+            if videos:
+                for video in videos:
+                    self.dp.bot.send_video(chat_id=user_id, video=open(video, 'rb'))
+                logging.info('videos sent')
 

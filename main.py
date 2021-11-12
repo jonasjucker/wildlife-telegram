@@ -8,6 +8,13 @@ from sensors import Pir
 from cam import WildCam
 from bot import WildBot
 
+def shutdown():
+        cam.close()
+        bot.stop()
+        pir.deactivate()
+        logging.info('Shutdown')
+        sys.exit(0)
+
 def main():
 
     # Enable logging
@@ -38,18 +45,20 @@ def main():
     while True:
         logging.info('Enter infinite loop')
         pir.wait_for_movement()
-        photos = cam.shot(nr_of_shots=5,pause=1,night_mode=False)
-        video = cam.record(10,night_mode=True)
-        bot.broadcast(photos,video)
-        logging.info('sleep 10s ...')
-        time.sleep(10)
+        photos = cam.shot(nr_of_shots=3,pause=4,night_mode=False)
+        #video = cam.record(10,night_mode=True)
+        bot.broadcast(photos,[])
+
+        if bot.user_wants_test:
+            bot.user_wants_test = False
+            photos,videos = cam.test()
+            bot.broadcast(photos,videos)
 
         if bot.user_wants_shutdown:
-            cam.close()
-            bot.stop()
-            pir.deactivate()
-            logging.info('Shutdown')
-            sys.exit(0)
+            shutdown()
+
+        logging.info('sleep 10s ...')
+        time.sleep(10)
 
 if __name__ == '__main__':
     main()

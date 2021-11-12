@@ -1,5 +1,6 @@
 import RPi.GPIO as GPIO
 import logging
+from exchange import set_bot_action,is_bot_action
 
 class Pir:
 
@@ -20,11 +21,16 @@ class Pir:
 
     def wait_for_movement(self):
         no_movement = True
+        no_bot_action = True
         logging.info('Wait for movement...')
-        while no_movement:
+        while no_movement and no_bot_action: 
+            no_bot_action = not is_bot_action()
+
             if GPIO.event_detected(self.pin):
                no_movement = False
-        logging.info('Movement detected')
+               logging.info('Movement detected')
+
+        set_bot_action(False)
 
 if __name__ == '__main__':
 

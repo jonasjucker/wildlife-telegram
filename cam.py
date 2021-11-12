@@ -25,6 +25,20 @@ class WildCam:
     def close(self):
         self.lens.close()
 
+
+    def test(self):
+        logging.info('Test camera setup')
+        photo_day = self.shot(nr_of_shots=1,pause=4,night_mode=False)
+        video_day = self.record(4,night_mode=False)
+        photo_night = self.shot(nr_of_shots=1,pause=4,night_mode=True)
+        video_night = self.record(4,night_mode=True)
+
+        photos = photo_day + photo_night
+        videos = video_day + video_night
+
+        return photos,videos
+
+
     def vision_settings(self,is_night):
         if self.is_recording:
             GPIO.output(self.ir_light_1,GPIO.LOW)
@@ -52,6 +66,7 @@ class WildCam:
 
     def record(self,duration, night_mode=False):
 
+        record = []
         self.vision_settings(night_mode)
 
         record_name = self.new_record_name('h264','v')
@@ -67,9 +82,11 @@ class WildCam:
         call([command], shell=True)
         logging.info("MP4Box => Video Converted!")
 
-        return record_mp4
+        record.append(record_mp4)
 
-    def shot(self,nr_of_shots=1,pause=1,night_mode=False):
+        return record
+
+    def shot(self,nr_of_shots=1,pause=5,night_mode=False):
 
         self.vision_settings(night_mode)
 
@@ -78,7 +95,7 @@ class WildCam:
             record_name = self.new_record_name('jpg','p')
             self.lens.capture(record_name)
             logging.info(f'Shot {idx} taken')
-            time.sleep(pause)
+            time.sleep(pause/10.0)
             shots_taken.append(record_name)
 
         self.vision_settings(night_mode)
