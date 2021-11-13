@@ -24,13 +24,20 @@ class WildBot:
         self.dp.add_handler(CommandHandler('subscribe',self._subscribe))
         self.dp.add_handler(CommandHandler('unsubscribe',self._unsubscribe))
         self.dp.add_handler(CommandHandler('test',self._test))
+        self.dp.add_handler(CommandHandler('motion_control',self._motion_control))
         self.dp.add_handler(CommandHandler('shutdown',self._shutdown))
 
         self.user_wants_shutdown = False
         self.user_wants_test = False
+        self.is_sensible_to_motion = True
 
         # start the bot
         self.updater.start_polling()
+
+    def _change_motion_sensibility(self):
+        
+        self.is_sensible_to_motion = not self.is_sensible_to_motion
+        print(self.is_sensible_to_motion)
 
     def stop(self):
         self.updater.stop()
@@ -40,7 +47,9 @@ class WildBot:
                       Write /unsubscribe to no longer receive cute pics"
 
         reply_keyboard = [
-            ['/subscribe', '/unsubscribe', '/test'],
+            ['/subscribe', '/unsubscribe'],
+            ['/motion_control', '/test'],
+            ['/shutdown'],
         ]
 
         markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=False)
@@ -78,6 +87,15 @@ class WildBot:
         set_bot_action(True)
         user_id = update.effective_user.id
         logging.info(f'user: {user_id} scheduled test')
+    
+    def _motion_control(self,update: Update, context: CallbackContext):
+        reply_text = "Modify motions sensitivity of LonelyCam"
+        update.message.reply_text(reply_text)
+
+        self._change_motion_sensibility()
+        set_bot_action(True)
+        user_id = update.effective_user.id
+        logging.info(f'user: {user_id} changed motion sensibility')
 
     def _shutdown(self,update: Update, context: CallbackContext):
         reply_text = "You are about to shut down LonelyCam."
