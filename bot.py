@@ -29,7 +29,7 @@ class WildBot:
 
         self.user_wants_shutdown = False
         self.user_wants_test = False
-        self.is_sensible_to_motion = True
+        self.is_sensible_to_motion = False
 
         # start the bot
         self.updater.start_polling()
