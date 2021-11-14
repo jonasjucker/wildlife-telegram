@@ -7,6 +7,7 @@ import sys
 from sensors import Pir
 from cam import WildCam
 from bot import WildBot
+from location import CamLocation
 
 def shutdown(cam,bot,pir):
         cam.close()
@@ -43,7 +44,9 @@ def main():
     cam = WildCam()
     bot = WildBot(args.bot_token)
 
-    snooze = 5
+    spot = CamLocation(47.3,8.5,"Somewhere in the forest", "Switzerland", "Europe/Zurich")
+
+    snooze = 10
 
     logging.info('Enter infinite loop')
     while True:
@@ -54,7 +57,7 @@ def main():
             pir.wait_for_movement()
 
             if bot.is_sensible_to_motion:
-                photos = cam.shot(nr_of_shots=3,pause=4,night_mode=False)
+                photos = cam.shot(nr_of_shots=5,pause=10,night_mode=spot.is_night())
                 #video = cam.record(10,night_mode=True)
                 bot.broadcast(photos,[])
 
@@ -68,7 +71,7 @@ def main():
         if bot.user_wants_shutdown:
             shutdown(cam,bot,pir)
 
-        logging.info(f'sleep {snooze}s ...')
+        logging.info(f'snooze {snooze}s ...')
         time.sleep(snooze)
 
 if __name__ == '__main__':

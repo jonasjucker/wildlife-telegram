@@ -31,19 +31,3 @@ class Pir:
                logging.info('Movement detected')
 
         set_bot_action(False)
-
-if __name__ == '__main__':
-
-    GPIO.setmode(GPIO.BCM)
-    pirtest = Pir()
-
-    pirtest.activate()
-
-    pirtest.wait_for_movement()
-    pirtest.deactivate()
-    pirtest.wait_for_movement()
-    pirtest.wait_for_movement()
-
-    pirtest.wait_for_movement()
-
-    pirtest.deactivate()

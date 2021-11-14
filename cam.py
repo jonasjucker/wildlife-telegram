@@ -51,6 +51,9 @@ class WildCam:
                 GPIO.output(self.pin,GPIO.LOW)
                 GPIO.output(self.ir_light_1,GPIO.HIGH)
                 GPIO.output(self.ir_light_2,GPIO.HIGH)
+
+                # needed during night for camera to adjust
+                time.sleep(1.8)
             else:
                 GPIO.output(self.pin,GPIO.HIGH)
 
@@ -116,21 +119,3 @@ class WildCam:
             name = os.path.join('garbage',name)
 
         return name
-
-
-if __name__ == '__main__':
-
-    GPIO.setmode(GPIO.BCM)
-    camtest = WildCam()
-
-    camtest.preview(2,night_mode=True)
-    camtest.preview(2)
-
-    camtest.shot(nr_of_shots=2,pause=1,)
-    camtest.shot(nr_of_shots=2,pause=1,night_mode=True)
-
-    camtest.record(3)
-    camtest.record(3,night_mode=True)
-
-    camtest.close()
-    GPIO.cleanup()
