@@ -3,6 +3,7 @@ from picamera import PiCamera
 import time
 import os
 import logging
+from brightpi import *
 
 from subprocess import call
 
@@ -13,6 +14,8 @@ class WildCam:
         self.pin = 24
         self.ir_light_1 = 25
         self.ir_light_2 = 8
+
+        self.brightPi = BrightPi()
 
         self.lens = PiCamera()
 
@@ -43,6 +46,10 @@ class WildCam:
         if self.is_recording:
             GPIO.output(self.ir_light_1,GPIO.LOW)
             GPIO.output(self.ir_light_2,GPIO.LOW)
+
+            self.brightPi.set_led_on_off(LED_IR, OFF)
+            self.brightPi.reset()
+
             self.is_recording = False
 
         else:
@@ -51,6 +58,9 @@ class WildCam:
                 GPIO.output(self.pin,GPIO.LOW)
                 GPIO.output(self.ir_light_1,GPIO.HIGH)
                 GPIO.output(self.ir_light_2,GPIO.HIGH)
+
+                self.brightPi.set_led_on_off(LED_IR, ON)
+                self.brightPi.set_gain(15)
 
                 # needed during night for camera to adjust
                 time.sleep(1.8)
