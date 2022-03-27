@@ -16,6 +16,10 @@ def shutdown(cam,bot,pir):
         logging.info('Shutdown')
         sys.exit(0)
 
+def bot_shutdown(bot):
+    bot.stop()
+    logging.info('Shutdown-bot')
+
 def main():
 
     # Enable logging
@@ -59,7 +63,9 @@ def main():
             if bot.is_sensible_to_motion:
                 photos = cam.shot(nr_of_shots=5,pause=10,night_mode=spot.is_night())
                 #video = cam.record(10,night_mode=True)
-                bot.broadcast(photos,[])
+
+                if not bot.already_down:
+                    bot.broadcast(photos,[])
 
         # test mode
         if bot.user_wants_test:
@@ -70,6 +76,11 @@ def main():
         # shutdown
         if bot.user_wants_shutdown:
             shutdown(cam,bot,pir)
+
+        # bot-shutdown
+        if bot.user_wants_bot_shutdown and not bot.already_down:
+            bot_shutdown(bot)
+            bot_already_down = True
 
         logging.info(f'snooze {snooze}s ...')
         time.sleep(snooze)

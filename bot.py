@@ -25,11 +25,14 @@ class WildBot:
         self.dp.add_handler(CommandHandler('unsubscribe',self._unsubscribe))
         self.dp.add_handler(CommandHandler('test',self._test))
         self.dp.add_handler(CommandHandler('motion_control',self._motion_control))
+        self.dp.add_handler(CommandHandler('bot_shutdown',self._bot_shutdown))
         self.dp.add_handler(CommandHandler('shutdown',self._shutdown))
 
         self.user_wants_shutdown = False
         self.user_wants_test = False
         self.is_sensible_to_motion = False
+        self.user_wants_bot_shutdown = False
+        self.already_down = False
 
         # start the bot
         self.updater.start_polling()
@@ -37,10 +40,10 @@ class WildBot:
     def _change_motion_sensibility(self):
         
         self.is_sensible_to_motion = not self.is_sensible_to_motion
-        print(self.is_sensible_to_motion)
 
     def stop(self):
         self.updater.stop()
+        self.already_down = True
 
     def _start(self,update: Update, context: CallbackContext):
         reply_text = "Hi! I am LonelyCam. If you want to subscribe write /subscribe. \
@@ -49,6 +52,7 @@ class WildBot:
         reply_keyboard = [
             ['/subscribe', '/unsubscribe'],
             ['/motion_control', '/test'],
+            ['/bot_shutdown'],
             ['/shutdown'],
         ]
 
@@ -96,6 +100,15 @@ class WildBot:
         set_bot_action(True)
         user_id = update.effective_user.id
         logging.info(f'user: {user_id} changed motion sensibility')
+
+    def _bot_shutdown(self,update: Update, context: CallbackContext):
+        reply_text = "You are about to shut down the bot of LonelyCam."
+        update.message.reply_text(reply_text)
+
+        self.user_wants_bot_shutdown = True
+        set_bot_action(True)
+        user_id = update.effective_user.id
+        logging.info(f'user: {user_id} scheduled bot-shutdown')
 
     def _shutdown(self,update: Update, context: CallbackContext):
         reply_text = "You are about to shut down LonelyCam."

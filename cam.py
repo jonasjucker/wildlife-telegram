@@ -115,7 +115,5 @@ class WildCam:
             name = os.path.join('videos',name)
         elif type == 'p':
             name = os.path.join('photos',name)
-        else:
-            name = os.path.join('garbage',name)
 
         return name
