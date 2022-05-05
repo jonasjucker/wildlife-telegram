@@ -1,5 +1,6 @@
 import argparse
 import logging
+import socket
 from exchange import set_bot_action
 
 from telegram import ReplyKeyboardMarkup, Update
@@ -27,6 +28,7 @@ class WildBot:
         self.dp.add_handler(CommandHandler('motion_control',self._motion_control))
         self.dp.add_handler(CommandHandler('bot_shutdown',self._bot_shutdown))
         self.dp.add_handler(CommandHandler('shutdown',self._shutdown))
+        self.dp.add_handler(CommandHandler('where_am_I',self._get_ip_address))
 
         self.user_wants_shutdown = False
         self.user_wants_test = False
@@ -52,8 +54,8 @@ class WildBot:
         reply_keyboard = [
             ['/subscribe', '/unsubscribe'],
             ['/motion_control', '/test'],
-            ['/bot_shutdown'],
-            ['/shutdown'],
+            ['/bot_shutdown', '/shutdown'],
+            ['/where_am_I'],
         ]
 
         markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=False)
@@ -118,6 +120,18 @@ class WildBot:
         set_bot_action(True)
         user_id = update.effective_user.id
         logging.info(f'user: {user_id} scheduled shutdown')
+
+    def _get_ip_address(self,update: Update, context: CallbackContext):
+        ip_address = '';
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8",80))
+        ip_address = s.getsockname()[0]
+        s.close()
+
+        reply_text = f"IP_ADDRESS: {ip_address}"
+        update.message.reply_text(reply_text)
+
+        set_bot_action(True)
 
     def broadcast(self,photos,videos):
         message = 'Hello from subscription'
