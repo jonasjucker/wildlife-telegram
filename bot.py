@@ -1,6 +1,6 @@
-import argparse
 import logging
 import socket
+import time
 from exchange import set_bot_action
 
 from telegram import ReplyKeyboardMarkup, Update
@@ -12,32 +12,43 @@ from telegram.ext import (
     CallbackContext,
 )
 
+
+
+
 class WildBot:
 
-    def __init__(self,token):
+    def __init__(self,token,offline=False):
 
-        # Create the Updater and pass it your bot's token.
-        persistence = PicklePersistence(filename='backup/bot.pkl')
-        self.updater = Updater(token, persistence=persistence)
+        if not offline:
+            # Create the Updater and pass it your bot's token.
+            persistence = PicklePersistence(filename='backup/bot.pkl')
+            self.updater = Updater(token, persistence=persistence)
 
-        self.dp = self.updater.dispatcher
-        self.dp.add_handler(CommandHandler('start',self._start))
-        self.dp.add_handler(CommandHandler('subscribe',self._subscribe))
-        self.dp.add_handler(CommandHandler('unsubscribe',self._unsubscribe))
-        self.dp.add_handler(CommandHandler('test',self._test))
-        self.dp.add_handler(CommandHandler('motion_control',self._motion_control))
-        self.dp.add_handler(CommandHandler('bot_shutdown',self._bot_shutdown))
-        self.dp.add_handler(CommandHandler('shutdown',self._shutdown))
-        self.dp.add_handler(CommandHandler('where_am_I',self._get_ip_address))
+            self.dp = self.updater.dispatcher
+            self.dp.add_handler(CommandHandler('start',self._start))
+            self.dp.add_handler(CommandHandler('subscribe',self._subscribe))
+            self.dp.add_handler(CommandHandler('unsubscribe',self._unsubscribe))
+            self.dp.add_handler(CommandHandler('test',self._test))
+            self.dp.add_handler(CommandHandler('motion_control',self._motion_control))
+            self.dp.add_handler(CommandHandler('bot_shutdown',self._bot_shutdown))
+            self.dp.add_handler(CommandHandler('shutdown',self._shutdown))
+            self.dp.add_handler(CommandHandler('where_am_I',self._get_ip_address))
+
+            # start the bot
+            self.updater.start_polling()
 
         self.user_wants_shutdown = False
         self.user_wants_test = False
         self.is_sensible_to_motion = False
         self.user_wants_bot_shutdown = False
         self.already_down = False
+        self.is_offline_for_failover = offline
 
-        # start the bot
-        self.updater.start_polling()
+        # flag to mark that bot could not be connected and
+        # a failover instance is used
+        # based on this flag a restart is triggered
+        self.has_no_connection = offline
+
 
     def _change_motion_sensibility(self):
         
@@ -128,24 +139,45 @@ class WildBot:
         ip_address = s.getsockname()[0]
         s.close()
 
-        reply_text = f"IP_ADDRESS: {ip_address}"
+        reply_text = f"IP-ADDRESS: {ip_address}"
         update.message.reply_text(reply_text)
 
         set_bot_action(True)
 
+    def _connection_error(self,error):
+        logging.warning(f'Bot connection lost: {error}')
+        self.has_no_connection = True
+
+
     def broadcast(self,photos,videos):
-        message = 'Hello from subscription'
-        for user_id in self.dp.bot_data['user_id']:
-            logging.info(user_id)
-            self.dp.bot.send_message(chat_id=user_id, text=message)
+        if self.is_offline_for_failover:
+            logging.info('Bot not connected -> skip bot.broadcast')
+        else:
+            message = 'Hello from subscription'
+            for user_id in self.dp.bot_data['user_id']:
+                logging.info(user_id)
+                try:
+                    self.dp.bot.send_message(chat_id=user_id, text=message)
+                except Exception as e:
+                    self._connection_error(e)
+                    return
 
-            if photos:
-                for photo in photos:
-                    self.dp.bot.send_photo(chat_id=user_id, photo=open(photo, 'rb'))
-                logging.info('photos sent')
+                if photos:
+                    try:
+                        for photo in photos:
+                            self.dp.bot.send_photo(chat_id=user_id, photo=open(photo, 'rb'))
+                    except Exception as e:
+                        self._connection_error(e)
+                        return
+                    logging.info('photos sent')
 
-            if videos:
-                for video in videos:
-                    self.dp.bot.send_video(chat_id=user_id, video=open(video, 'rb'))
-                logging.info('videos sent')
+                if videos:
+                    try:
+                        for video in videos:
+                            self.dp.bot.send_video(chat_id=user_id, video=open(video, 'rb'))
+                    except Exception as e:
+                        self._connection_error(e)
+                        return
+                    logging.info('videos sent')
+
 

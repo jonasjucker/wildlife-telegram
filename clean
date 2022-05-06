@@ -1,5 +1,6 @@
 #!/bin/bash
 set -x
 
+rm -f log
 rm -f videos/*
 rm -f photos/*
