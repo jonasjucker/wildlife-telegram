@@ -66,7 +66,7 @@ def main():
 
     cam = WildCam()
 
-    bot = bot_launch(args.bot_token, retry=3, wait=1)
+    bot = bot_launch(args.bot_token, retry=10, wait=5)
 
     spot = CamLocation(47.3,8.5,"Somewhere in the forest", "Switzerland", "Europe/Zurich")
 
