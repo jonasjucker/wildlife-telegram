@@ -18,7 +18,7 @@ class WildCam:
         #self.brightPi = BrightPi()
 
         self.lens = PiCamera()
-        self.lens.resolution=(64,64)
+        self.lens.resolution=(512,512)
 
         GPIO.setup(self.pin,GPIO.OUT)
         GPIO.setup(self.ir_light_1,GPIO.OUT)
