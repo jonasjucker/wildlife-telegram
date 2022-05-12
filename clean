@@ -2,5 +2,6 @@
 set -x
 
 rm -f log
-rm -f videos/*
-rm -f photos/*
+rm -rf videos/*
+rm -rf photos/*
+

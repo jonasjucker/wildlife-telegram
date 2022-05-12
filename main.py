@@ -8,6 +8,8 @@ from sensors import Pir
 from cam import WildCam
 from bot import WildBot
 from location import CamLocation
+from events import new_record_name,new_test_record_name
+from image_processing import collective_image
 
 def bot_launch(bot_token,retry=3, wait=1):
 
@@ -81,8 +83,8 @@ def main():
             pir.wait_for_movement()
 
             if bot.is_sensible_to_motion:
-                photos = cam.shot(nr_of_shots=5,pause=10,night_mode=spot.is_night())
-                #video = cam.record(10,night_mode=True)
+                photos = cam.shot(nr_of_shots=5,pause=10,night_mode=spot.is_night(),name_generator=new_record_name)
+                #video = cam.record(10,night_mode=True, new_record_name,name_generator=new_record_name))
 
                 if not bot.already_down:
                     bot.broadcast(photos,[])
@@ -90,7 +92,9 @@ def main():
         # test mode
         if bot.user_wants_test:
             bot.user_wants_test = False
-            photos,videos = cam.test()
+            photos,videos = cam.test(new_test_record_name)
+            photos = collective_image('photos/test',5) 
+            print(photos)
             bot.broadcast(photos,videos)
 
         # shutdown

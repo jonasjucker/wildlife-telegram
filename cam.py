@@ -30,12 +30,12 @@ class WildCam:
         self.lens.close()
 
 
-    def test(self):
+    def test(self,name_generator):
         logging.info('Test camera setup')
-        photo_day = self.shot(nr_of_shots=1,pause=4,night_mode=False)
-        video_day = self.record(4,night_mode=False)
-        photo_night = self.shot(nr_of_shots=1,pause=4,night_mode=True)
-        video_night = self.record(4,night_mode=True)
+        photo_day = self.shot(nr_of_shots=1,pause=4,night_mode=False,name_generator=name_generator)
+        video_day = self.record(4,night_mode=False,name_generator=name_generator)
+        photo_night = self.shot(nr_of_shots=1,pause=4,night_mode=True,name_generator=name_generator)
+        video_night = self.record(4,night_mode=True,name_generator=name_generator)
 
         photos = photo_day + photo_night
         videos = video_day + video_night
@@ -79,13 +79,13 @@ class WildCam:
         self.lens.stop_preview()
         self.vision_settings(night_mode)
 
-    def record(self,duration, night_mode=False):
+    def record(self,duration, night_mode=False,name_generator=None):
 
         record = []
         self.vision_settings(night_mode)
 
-        record_name = self.new_record_name('h264','v')
-        record_mp4 = self.new_record_name('mp4','v')
+        record_name = name_generator('h264','v')
+        record_mp4 = name_generator('mp4','v')
         self.lens.start_recording(record_name)
         time.sleep(duration)
         self.lens.stop_recording()
@@ -101,13 +101,13 @@ class WildCam:
 
         return record
 
-    def shot(self,nr_of_shots=1,pause=5,night_mode=False):
+    def shot(self,nr_of_shots=1,pause=5,night_mode=False,name_generator=None):
 
         self.vision_settings(night_mode)
 
         shots_taken = []
         for idx in range(1,nr_of_shots+1):
-            record_name = self.new_record_name('jpg','p')
+            record_name = name_generator('jpg','p')
             self.lens.capture(record_name)
             logging.info(f'Shot {idx} taken')
             time.sleep(pause/10.0)
@@ -116,16 +116,3 @@ class WildCam:
         self.vision_settings(night_mode)
 
         return shots_taken
-
-    def new_record_name(self,suffix,type):
-        t = time.localtime()
-        timestamp = time.strftime('%Y-%m-%d_%H%M%S', t)
-
-
-        name = timestamp + "." + suffix 
-        if type == 'v':
-            name = os.path.join('videos',name)
-        elif type == 'p':
-            name = os.path.join('photos',name)
-
-        return name
