@@ -4,4 +4,5 @@ set -x
 rm -f log
 rm -rf videos/*
 rm -rf photos/*
+rm -rf composites/*
 

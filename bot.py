@@ -33,6 +33,7 @@ class WildBot:
             self.dp.add_handler(CommandHandler('bot_shutdown',self._bot_shutdown))
             self.dp.add_handler(CommandHandler('shutdown',self._shutdown))
             self.dp.add_handler(CommandHandler('where_am_I',self._get_ip_address))
+            self.dp.add_handler(CommandHandler('summary',self._summary))
 
             # start the bot
             self.updater.start_polling()
@@ -43,6 +44,7 @@ class WildBot:
         self.user_wants_bot_shutdown = False
         self.already_down = False
         self.is_offline_for_failover = offline
+        self.user_wants_event_summary = False
 
         # flag to mark that bot could not be connected and
         # a failover instance is used
@@ -66,7 +68,7 @@ class WildBot:
             ['/subscribe', '/unsubscribe'],
             ['/motion_control', '/test'],
             ['/bot_shutdown', '/shutdown'],
-            ['/where_am_I'],
+            ['/where_am_I','/summary'],
         ]
 
         markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=False)
@@ -148,12 +150,20 @@ class WildBot:
         logging.warning(f'Bot connection lost: {error}')
         self.has_no_connection = True
 
+    def _summary(self,update: Update, context: CallbackContext):
+        reply_text = "Collecting summary of events"
+        update.message.reply_text(reply_text)
 
-    def broadcast(self,photos,videos):
+        self.user_wants_event_summary = True
+        set_bot_action(True)
+        user_id = update.effective_user.id
+        logging.info(f'user: {user_id} requested summary of events')
+
+
+    def broadcast(self,photos,videos,message='Hello from subscription'):
         if self.is_offline_for_failover:
             logging.info('Bot not connected -> skip bot.broadcast')
         else:
-            message = 'Hello from subscription'
             for user_id in self.dp.bot_data['user_id']:
                 logging.info(user_id)
                 try:

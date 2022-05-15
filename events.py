@@ -1,31 +1,57 @@
 import time
 import os
 
-def new_record_name(suffix,type):
-    event = _event_name()
-    return _concat_name(event,suffix,type)
+class EventHandler():
 
-def new_test_record_name(suffix,type):
-    event = 'test'
-    return _concat_name(event,suffix,type)
+    def __init__(self,photos,videos,test):
+        self.photos = photos
+        self.videos = videos
+        self.test = test
 
-def _concat_name(event,suffix,type):
-    name = _record_name()
-    if type == 'v':
-        path = os.path.join('videos',event)
-    elif type == 'p':
-        path = os.path.join('photos',event)
-    else:
-        raise ValueError('Unknown suffix for record')
-    os.makedirs(path,exist_ok=True)
+    def new_record_name(self,suffix,type):
+        event = self._event_name()
+        return self._concat_name(event,suffix,type)
 
-    name = f'{name}.{suffix}'
-    name = os.path.join(path,name)
+    def strip(self,event_path):
+        return event_path.split("/")[-1]
 
-    return name
+    def new_test_record_name(self,suffix,type):
+        event = self.test
+        return self._concat_name(event,suffix,type)
 
-def _event_name():
-    time.strftime('%Y-%m-%d_%H', time.localtime())
-    return time.strftime('%Y-%m-%d_%H', time.localtime())
-def _record_name():
-    return time.strftime('%M:%S', time.localtime())
+    def list(self,type,ignore=None):
+        if type == 'v':
+            abs_to_event = os.path.abspath(self.videos)
+            events = os.listdir(self.videos)
+        elif type == 'p':
+            abs_to_event = os.path.abspath(self.photos)
+            events = os.listdir(self.photos)
+        else:
+            raise ValueError('Unknown suffix for event')
+
+        if ignore:
+            events.remove(ignore)
+
+        return [os.path.join(abs_to_event,event) for event in events]
+
+    def _concat_name(self,event,suffix,type):
+        name = self._record_name()
+        if type == 'v':
+            path = os.path.join(self.videos,event)
+        elif type == 'p':
+            path = os.path.join(self.photos,event)
+        else:
+            raise ValueError('Unknown suffix for record')
+        os.makedirs(path,exist_ok=True)
+
+        name = f'{name}.{suffix}'
+        name = os.path.join(path,name)
+
+        return name
+
+    def _event_name(self):
+        time.strftime('%Y-%m-%d_%H', time.localtime())
+        return time.strftime('%Y-%m-%d_%H', time.localtime())
+    def _record_name(self):
+        return time.strftime('%M:%S', time.localtime())
+

@@ -48,12 +48,16 @@ def compose_image(images, sizes):
 def split_into_chunks(image_names,chunksize):
     return [image_names[i:i+chunksize] for i in range(0,len(image_names),chunksize)]
 
-def collective_image(folder,chunksize):
-    image_chunks = split_into_chunks(images_from_folder(folder), chunksize)
+def collective_image(source,destination,chunksize,identifier=None):
+    image_chunks = split_into_chunks(images_from_folder(source), chunksize)
     names = []
     count = 0
     for chunk in image_chunks:
-        names.append(os.path.join(folder,f'composite_{count}.jpg'))
+        if identifier:
+            names.append(os.path.join(destination,f'{identifier}_composite_{count}.jpg'))
+        else:
+            names.append(os.path.join(destination,f'composite_{count}.jpg'))
+
         images = load_images(chunk)
         dims = dimensions_of_total_image(images)
         image = compose_image(images,dims)
