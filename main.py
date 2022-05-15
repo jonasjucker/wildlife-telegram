@@ -85,17 +85,17 @@ def main():
             pir.wait_for_movement()
 
             if bot.is_sensible_to_motion:
-                photos = cam.shot(nr_of_shots=5,pause=10,night_mode=spot.is_night(),name_generator=event.new_record_name)
+                photos = cam.shot(nr_of_shots=3,pause=30,night_mode=spot.is_night(),name_generator=event.new_record_name)
                 #video = cam.record(10,night_mode=True, new_record_name,name_generator=event.new_record_name))
 
                 if not bot.already_down:
-                    bot.broadcast(photos,[])
+                    logging.info('Skip boradcast for now')
+                #    bot.broadcast(photos,[])
 
         # summary of all photo-events
         if bot.user_wants_event_summary:
             bot.user_wants_event_summary = False
-            #event_names = event.list('p',ignore='test')
-            event_names = event.list('p',ignore='.gitkeep')
+            event_names = event.list('p',ignore=['.gitkeep','test'])
             counter = 0
             photos = []
             for name in event_names:

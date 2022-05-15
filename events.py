@@ -1,4 +1,5 @@
 import time
+import logging
 import os
 
 class EventHandler():
@@ -30,7 +31,11 @@ class EventHandler():
             raise ValueError('Unknown suffix for event')
 
         if ignore:
-            events.remove(ignore)
+            for i in ignore:
+                try:
+                    events.remove(i)
+                except ValueError as e:
+                    logging.warning(f'List events: {e}')
 
         return [os.path.join(abs_to_event,event) for event in events]
 

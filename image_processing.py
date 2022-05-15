@@ -1,6 +1,7 @@
 import os
 import math
 import sys
+import logging
 from PIL import Image
 
 def images_from_folder(folder):
@@ -12,7 +13,7 @@ def load_images(image_names):
 def dimensions_of_total_image(images):
     
     total_nr = len(images)
-    print(total_nr)
+    logging.debug(f'Compute ratios for {total_nr} sub-images')
     sizes = {}
     sizes['x'] = math.ceil(math.sqrt(total_nr))
     sizes['y'] = math.ceil(math.sqrt(total_nr))
@@ -32,13 +33,13 @@ def compose_image(images, sizes):
     for image in images:
         small_image = image.resize(sizes['image'])
         if col < sizes['x']:
-            print(location)
+            logging.debug(f'Place sub-image at location:{location}')
             total_image.paste(small_image,location)
             location = (location[0] + sizes['image'][0], location[1])
             col += 1
         else:
             location = (0, location[1] + sizes['image'][1])
-            print(location)
+            logging.debug(f'Place sub-image at location:{location}')
             total_image.paste(small_image,location)
             location = (sizes['image'][0], location[1] )
             col = 1
@@ -49,6 +50,7 @@ def split_into_chunks(image_names,chunksize):
     return [image_names[i:i+chunksize] for i in range(0,len(image_names),chunksize)]
 
 def collective_image(source,destination,chunksize,identifier=None):
+    logging.info(f'Create collective image with {chunksize} sub-images')
     image_chunks = split_into_chunks(images_from_folder(source), chunksize)
     names = []
     count = 0
