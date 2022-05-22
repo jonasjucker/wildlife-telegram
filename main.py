@@ -74,7 +74,7 @@ def main():
 
     spot = CamLocation(47.3,8.5,"Somewhere in the forest", "Switzerland", "Europe/Zurich")
 
-    snooze = 10
+    snooze = 5
 
     logging.info('Enter infinite loop')
     while True:
@@ -85,7 +85,7 @@ def main():
             pir.wait_for_movement()
 
             if bot.is_sensible_to_motion:
-                photos = cam.shot(nr_of_shots=3,pause=30,night_mode=spot.is_night(),name_generator=event.new_record_name)
+                photos = cam.shot(nr_of_shots=5,pause=15,night_mode=spot.is_night(),name_generator=event.new_record_name)
                 #video = cam.record(10,night_mode=True, new_record_name,name_generator=event.new_record_name))
 
                 if not bot.already_down:
@@ -107,7 +107,6 @@ def main():
         if bot.user_wants_test:
             bot.user_wants_test = False
             photos,videos = cam.test(event.new_test_record_name)
-            photos = collective_image(os.path.join(event.photos,event.test),'composites',10) 
             bot.broadcast(photos,videos)
 
         # shutdown
