@@ -1,6 +1,7 @@
 import time
 import logging
 import os
+from natsort import natsorted
 
 class EventHandler():
 
@@ -23,12 +24,15 @@ class EventHandler():
     def list(self,type,ignore=None):
         if type == 'v':
             abs_to_event = os.path.abspath(self.videos)
-            events = os.listdir(self.videos)
+            events = natsorted(os.listdir(self.videos))
         elif type == 'p':
             abs_to_event = os.path.abspath(self.photos)
-            events = os.listdir(self.photos)
+            events = natsorted(os.listdir(self.photos))
         else:
             raise ValueError('Unknown suffix for event')
+
+        # put most recent event first
+        events.reverse()
 
         if ignore:
             for i in ignore:

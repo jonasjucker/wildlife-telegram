@@ -3,9 +3,14 @@ import math
 import sys
 import logging
 from PIL import Image
+from natsort import natsorted
 
 def images_from_folder(folder):
-    return [os.path.join(folder,images) for images in os.listdir(folder) if 'jpg' in images]
+    images = natsorted([os.path.join(folder,images) for images in os.listdir(folder) if 'jpg' in images])
+
+    # we want most recent images first
+    images.reverse()
+    return images
 
 def load_images(image_names):
     return [Image.open(name) for name in image_names]
@@ -67,3 +72,16 @@ def collective_image(source,destination,chunksize,identifier=None):
         count+=1
 
     return names
+
+if __name__ == '__main__' :
+    from events import EventHandler
+    logging.basicConfig(
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', 
+        level=logging.DEBUG,
+    )
+
+    logger = logging.getLogger(__name__)
+    event = EventHandler('photos','videos','test')
+    event_names = event.list('p',ignore=['.gitkeep','test'])
+    print(event_names)
+    _ = collective_image('photos/2022-05-23_08','composites',25,identifier='y')
