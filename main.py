@@ -85,7 +85,7 @@ def main():
             pir.wait_for_movement()
 
             if bot.is_sensible_to_motion:
-                photos = cam.shot(nr_of_shots=5,pause=15,night_mode=spot.is_night(),name_generator=event.new_record_name)
+                photos = cam.shot(nr_of_shots=2,pause=10,night_mode=spot.is_night(),name_generator=event.new_record_name)
                 #video = cam.record(10,night_mode=True, new_record_name,name_generator=event.new_record_name))
 
                 if not bot.already_down:

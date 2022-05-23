@@ -31,3 +31,16 @@ class Pir:
                logging.info('Movement detected')
 
         set_bot_action(False)
+
+if __name__ == '__main__':
+    logging.basicConfig(
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', 
+        level=logging.DEBUG,
+    )
+
+    logger = logging.getLogger(__name__)
+    GPIO.setmode(GPIO.BCM)
+    pir = Pir()
+    pir.activate()
+    while True:
+        pir.wait_for_movement()
